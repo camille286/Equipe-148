@@ -21,35 +21,6 @@ print(f"|Q{n+1} - Q{n}| =", abs(Qn1 - Qn))
 print(f"Q{n} (5 chiffres signif) =", format(Qn, ".5g"))
 
 # =========================
-# (d) Propagation d’erreur
-# =========================
-
-def O(Q):
-    return math.exp(Q)
-
-def D(Q):
-    return -Q**2 + 5
-
-errQ = abs(Qn1 - Qn)
-
-DeltaO = abs(math.exp(Qn)) * errQ      # O'(Q)=e^Q
-DeltaD = abs(-2*Qn) * errQ             # D'(Q)=-2Q
-
-print("\nΔO <=", DeltaO)
-print("ΔD <=", DeltaD)
-
-
-# =========================
-# (e) Valeurs arrondies
-# =========================
-
-OQn = O(Qn)
-DQn = D(Qn)
-
-print("\nO(Qn) =", format(OQn, ".5g"))
-print("D(Qn) =", format(DQn, ".5g"))
-
-# =========================
 # POINT FIXE
 # =========================
 
@@ -68,21 +39,32 @@ def gN(Q):
 
 def print_table(iterations, title, max_rows=None):
     print("\n" + title)
-    print("n\tQn\t\t\t|en|")
+    print("n\tQn\t\t\t|en|\t\t|en+1/en|\t|en+1/e_n^2|\t|en+1/e_n^3|")
 
     N = len(iterations) - 1
     if max_rows is None:
         max_rows = N
 
     for n in range(0, min(max_rows, N) + 1):
+
         Qn = iterations[n]
 
         if n == 0:
-            print(f"{n}\t{Qn:.16f}\t-")
-        else:
-            en = abs(iterations[n] - iterations[n-1])
-            print(f"{n}\t{Qn:.16f}\t{en:.9e}")
+            print(f"{n}\t{Qn:.16f}\t-\t\t-\t\t-\t\t-")
+            continue
 
+        en = abs(iterations[n] - iterations[n-1])
+
+        if n < N:
+            en1 = abs(iterations[n+1] - iterations[n])
+
+            r1 = en1/en if en != 0 else float("inf")
+            r2 = en1/(en**2) if en != 0 else float("inf")
+            r3 = en1/(en**3) if en != 0 else float("inf")
+
+            print(f"{n}\t{Qn:.16f}\t{en:.9e}\t{r1:.6g}\t\t{r2:.6g}\t\t{r3:.6g}")
+        else:
+            print(f"{n}\t{Qn:.16f}\t{en:.9e}\t-\t\t-\t\t-")
 
 Q0 = 1
 tolr = 1e-8
@@ -96,3 +78,35 @@ print_table(it_g2, "Point fixe g2 (5 premières)", 5)
 
 it_gN = pointfixe(gN, Q0, tolr, nmax)
 print_table(it_gN, "Newton (gN)")
+
+# =========================
+# (m) Steffensen via point fixe
+# =========================
+
+def steffensen_transform(g):
+    """
+    Retourne la fonction point fixe gSteff(Q) associée à g(Q) :
+    gSteff(Q) = Q - (g(Q)-Q)^2 / (g(g(Q)) - 2g(Q) + Q)
+    """
+    def gSteff(Q):
+        y = g(Q)
+        z = g(y)
+        denom = z - 2*y + Q
+        if denom == 0:
+            # évite division par zéro (fallback)
+            return y
+        return Q - (y - Q)**2 / denom
+    return gSteff
+
+gSteff1 = steffensen_transform(g1)
+gSteff2 = steffensen_transform(g2)
+gSteffN = steffensen_transform(gN)
+
+it_steff_g1 = pointfixe(gSteff1, Q0, tolr, nmax)
+print_table(it_steff_g1, "Steffensen sur g1")
+
+it_steff_g2 = pointfixe(gSteff2, Q0, tolr, nmax)
+print_table(it_steff_g2, "Steffensen sur g2")
+
+it_steff_gN = pointfixe(gSteffN, Q0, tolr, nmax)
+print_table(it_steff_gN, "Steffensen sur gN")
