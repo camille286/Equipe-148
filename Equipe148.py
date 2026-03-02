@@ -2,26 +2,16 @@ import math
 from Bissection import Bissection
 from pointfixe import pointfixe
 
-# ==========================================================
-# PROBLÈME
-# O(Q) = e^Q
-# D(Q) = -Q/2 + 5
-# f(Q) = e^Q + Q/2 - 5
-# ==========================================================
 
 def F(Q):
     return math.exp(Q) + Q/2 - 5
 
-
-# ==========================================================
-# (b)(c) BISSECTION
-# ==========================================================
+# BISSECTION
 
 n = 18  # nombre d’itérations déterminé à la question b)
 
 X = Bissection(F, 1, 2, tol=1e-6, nmax=100)
 
-# Ajuster au besoin selon comment Bissection retourne la liste
 Qn  = X[n-1]
 Qn1 = X[n]
 
@@ -31,10 +21,7 @@ print(f"Q{n} = {Qn:.16f}")
 print(f"|Q{n+1} - Q{n}| = {abs(Qn1 - Qn):.16e}")
 print(f"Q{n} (5 chiffres significatifs) = {format(Qn, '.5g')}")
 
-
-# ==========================================================
-# (g) POINTS FIXES
-# ==========================================================
+# POINTS FIXES
 
 def g1(Q):
     return math.log(5 - Q/2)
@@ -42,10 +29,7 @@ def g1(Q):
 def g2(Q):
     return 10 - 2*math.exp(Q)
 
-
-# ==========================================================
-# (k)(l) NEWTON via point fixe
-# ==========================================================
+#  NEWTON
 
 def dF(Q):
     return math.exp(Q) + 0.5
@@ -53,10 +37,7 @@ def dF(Q):
 def gN(Q):
     return Q - F(Q)/dF(Q)
 
-
-# ==========================================================
-# OUTIL D’AFFICHAGE DES TABLEAUX
-# ==========================================================
+# TABLEAUX
 
 def print_table(iterations, title, max_rows=None):
     print("\n" + "="*len(title))
@@ -88,10 +69,6 @@ def print_table(iterations, title, max_rows=None):
             print(f"{n}\t{Qn:.16f}\t{en:.9e}\t-\t\t\t-\t\t\t-")
 
 
-# ==========================================================
-# (j) TABLEAUX g1 et g2
-# ==========================================================
-
 Q0 = 1
 tolr = 1e-8
 nmax = 150
@@ -109,21 +86,13 @@ print_table(
     5
 )
 
-
-# ==========================================================
-# (l) TABLEAU NEWTON
-# ==========================================================
-
 it_gN = pointfixe(gN, Q0, tolr, nmax)
 print_table(
     it_gN,
     "TABLEAU 3 — Convergence de la méthode de Newton via point fixe gN(Q)"
 )
 
-
-# ==========================================================
-# (m) STEFFENSEN
-# ==========================================================
+#STEFFENSEN
 
 def steffensen_transform(g):
     def gSteff(Q):

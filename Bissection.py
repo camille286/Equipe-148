@@ -1,11 +1,6 @@
 import time
 
 def Bissection(F, x1, x2, tol, nmax):
-    # F=F(x) is the function considered
-    # x1 is the lower bound of the interval considered
-    # x2 is the upper bound of the interval considered
-    # tol is the tolerance
-    # nmax is the maximum number of iterations
 
     F1 = F(x1)
     F2 = F(x2)
